@@ -29,7 +29,6 @@ gcm.sendClientNotification = function (title) {
 		senderClient.send(message, {
 			registrationIds: notificationIdList
 		}, function (error, result) {
-			console.log('???????????????????@@/');
 			if (error) {
 				console.error('GCM error!!!!!', error);
 			}
@@ -56,7 +55,6 @@ gcm.sendMerchantNotification = function (dealId, pushType) {
 				type: pushType
 			}
 		});
-		console.log('DDDDDDDDDDeal', deal);
 		senderMerchant.send(message, [deal.merchant.gcmId], function (error, result) {
 			if (error)
 				console.error(error);
