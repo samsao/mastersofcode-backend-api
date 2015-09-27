@@ -77,7 +77,7 @@ transactionRouter.get('/', passport.authenticate('bearer', {
 }), function (req, res, next) {
   Transaction.find({
     client: req.user._id
-  }).populate('deal').exec(function (error, transactions) {
+  }).populate('deal').sort({_id: -1}).exec(function (error, transactions) {
     if (error) {
       console.error(error);
       return res.status(500).json(error);
