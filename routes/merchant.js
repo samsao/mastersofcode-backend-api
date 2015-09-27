@@ -128,7 +128,49 @@ dealRouter.put('/:dealId', passport.authenticate('bearer', {
 transactionRouter.post('/complete', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
-  
+  Transaction.findOne({
+    key: req.body.key
+  }, function (error, transaction) {
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+    if (!transaction) {
+      return res.status(404).json({
+        message: 'transaction not found'
+      });
+    }
+    if (transaction.status) {
+      return res.status(403).json({
+        message: 'key has been used already'
+      });
+    }
+    if (transaction.merchant.toString() != req.user._id.toString()) {
+      console.log(transaction.merchant, req.user._id)
+      return res.status(403).json({
+        message: 'Wrong merchant'
+      });
+    }
+    transaction.status = 1;
+    console.log('transaction', transaction);
+    console.log('amount', transaction.amount);
+    console.log('paymentStatus', transaction.paymentStatus);
+    simplifyClient.payment.create({
+      amount: transaction.amount,
+      // description: "shipment of two eggs in a glass bottle",
+      authorization: transaction.paymentAuthorizationId,
+      reference: transaction.reference,
+      currency: "USD"
+    }, function (errData, data) {
+      if (errData) {
+        console.error("Error Message: ", errData.data);
+        return res.status(400).json(errData.data.error);
+      }
+      transaction.save();
+      console.log("Payment Status: " + data.paymentStatus);
+      return res.status(200).json(transaction);
+    });
+  });
 });
 
 router.get('/', function (req, res, next) {

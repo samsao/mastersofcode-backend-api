@@ -71,7 +71,7 @@ transactionRouter.get('/', passport.authenticate('bearer', {
 }), function (req, res, next) {
   Transaction.find({
     client: req.user._id
-  }, function (error, transactions) {
+  }).populate('deal').exec(function (error, transactions) {
     if (error) {
       console.error(error);
       return res.status(500).json(error);
@@ -95,7 +95,7 @@ transactionRouter.get('/:transactionId', passport.authenticate('bearer', {
 transactionRouter.post('/add', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
-  Deal.findById(req.body.dealId, function (error, deal) {
+  Deal.findById(req.body.deal, function (error, deal) {
     if (error) {
       console.error(error);
       return res.status(500).json(error);
@@ -126,9 +126,12 @@ transactionRouter.post('/add', passport.authenticate('bearer', {
       Transaction.create({
         client: req.user._id,
         deal: deal._id,
+        merchant: deal.merchant,
         paymentAuthorizationId: data.id,
         paymentStatus: data.paymentStatus,
-        key: Transaction.genKey('' + req.user._id + deal._id + Date.now())
+        amount: data.amount,
+        reference: data.reference,
+        key: Transaction.genKey('' + req.user._id + deal._id + Date.now()),
       }, function (error, transaction) {
         if (error) {
           console.error(error);
