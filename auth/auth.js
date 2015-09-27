@@ -9,12 +9,12 @@ passport.use(new BearerStrategy({
 }, function (req, accessToken, done) {
 	console.log('HEADER!', req.baseUrl);
 	var base = req.baseUrl.split('/')[1];
-	console.log('BASE!', base);
-	if (base.toLowerCase() === 'Client') {
+	if (base.toLowerCase() === 'client') {
 		Client.findOne({
 			token: accessToken
 		}, function (error, client) {
 			if (error) {
+				console.error(error);
 				return done(error);
 			}
 			if (!client) {
@@ -25,6 +25,7 @@ passport.use(new BearerStrategy({
 			var info = {
 				scope: '*'
 			};
+			console.log('client auth success');			
 			return done(null, client, info);
 		});
 	} else if (base.toLowerCase() === 'merchant') {
@@ -42,6 +43,7 @@ passport.use(new BearerStrategy({
 			var info = {
 				scope: '*'
 			};
+			console.log('merchant auth success');
 			return done(null, merchant, info);
 		});
 	} else {

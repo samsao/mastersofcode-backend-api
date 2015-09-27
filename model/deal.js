@@ -14,6 +14,9 @@ var Deal = new Schema({
 	description: {
 		type: String
 	},
+	originalPrice: {
+		type: Number
+	},
 	price: {
 		type: Number
 	},

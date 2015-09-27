@@ -1,16 +1,21 @@
 'use strict';
 var express = require('express');
 var router = express.Router();
-var connect = express.Router();
-var Client = require('../model/client');
+var passport = require('passport');
 
-connect.get('/test', function (req, res) {
+var connectRouter = express.Router();
+var dealRouter = express.Router();
+
+var Client = require('../model/client');
+var Deal = require('../model/deal');
+
+connectRouter.get('/test', function (req, res) {
   res.status(200).json({
     message: 'hahahaha'
   });
 });
 
-connect.get('/login', function (req, res) {
+connectRouter.get('/login', function (req, res) {
   Client.findOne({
     phone: req.query.phone
   }, function (error, client) {
@@ -29,7 +34,7 @@ connect.get('/login', function (req, res) {
   });
 });
 
-connect.post('/reg', function (req, res) {
+connectRouter.post('/reg', function (req, res) {
   Client.findOneAndUpdate({
     phone: req.body.phone,
   }, {
@@ -48,11 +53,23 @@ connect.post('/reg', function (req, res) {
     });
 });
 
+dealRouter.get('/', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  Deal.find({}, function (error, deals) {
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+    return res.status(200).json(deals);
+  });
+});
 
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
 });
 
-router.use('/connect', connect);
+router.use('/connect', connectRouter);
+router.use('/deal', dealRouter);
 
 module.exports = router;
