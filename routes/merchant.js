@@ -58,7 +58,8 @@ dealRouter.post('/add', passport.authenticate('bearer', {
     description: req.body.description,
     originalPrice: req.body.originalPrice,
     price: req.body.price,
-    image: req.body.image
+    image: req.body.image,
+    quantity: req.body.quantity
   }, function (error, deal) {
     if (error) {
       console.error(error);

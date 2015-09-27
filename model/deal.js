@@ -23,6 +23,10 @@ var Deal = new Schema({
 	image: {
 		type: String
 	},
+	quantity: {
+		type: Number,
+		default: 0
+	},
 	transactions:[{
 		type: Schema.Types.ObjectId,
 		ref: 'Transaction'
