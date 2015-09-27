@@ -126,12 +126,17 @@ dealRouter.get('/:dealId', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
   /// TODO check this deal is belong to this merchant
-  Deal.findById(req.params.dealId).populate('transactions').exec(function (error, transactions) {
+  Deal.findById(req.params.dealId).populate('transactions').exec(function (error, deal) {
     if (error) {
       console.error(error);
       return res.status(500).json(error);
     }
-    return res.status(200).json(transactions);
+    if (deal.merchant.toString != req.user._id.toString()) {
+      return res.status(403).json({
+        message: 'You are not the owner!'
+      });
+    }
+    return res.status(200).json(deal);
   });
 });
 
@@ -268,7 +273,7 @@ router.post('/withdraw', passport.authenticate('bearer', {
         console.error(error);
         return res.status(500).json(error);
       }
-      sendMoney(total);
+      // sendMoney(total);
       return res.status(200).json({
         moneySent: total
       });
