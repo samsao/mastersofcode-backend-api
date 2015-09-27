@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var client = require('./routes/client');
 var merchant = require('./routes/merchant');
+require('./auth/auth');
 
 var app = express();
 
