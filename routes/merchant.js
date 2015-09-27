@@ -38,7 +38,9 @@ connectRouter.post('/reg', function (req, res) {
 dealRouter.get('/', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
-  Deal.find()
+  Deal.find({
+    
+  })
 })
 
 router.get('/', function (req, res, next) {
