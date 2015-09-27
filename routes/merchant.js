@@ -176,6 +176,20 @@ dealRouter.put('/:dealId', passport.authenticate('bearer', {
   });
 });
 
+transactionRouter.get('/', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  Transaction.find({
+    merchant: req.user._id
+  }, function (error, transactions) {
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+    return res.status(200).json(transactions);
+  });
+});
+
 transactionRouter.post('/complete', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
