@@ -39,7 +39,7 @@ gcm.sendClientNotification = function () {
 	});
 }
 
-gcm.sendMerchantNotification = function (dealId) {
+gcm.sendMerchantNotification = function (dealId, pushType) {
 	console.log('dealId', dealId);
 	Deal.findById(dealId).populate('merchant').exec(function (error, deal) {
 		if (error) {
@@ -52,7 +52,8 @@ gcm.sendMerchantNotification = function (dealId) {
 				sound: "default"
 			},
 			data: {
-				deal: dealId
+				deal: dealId,
+				type: pushType
 			}
 		});
 		console.log('DDDDDDDDDDeal', deal);

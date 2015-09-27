@@ -143,7 +143,7 @@ transactionRouter.post('/add', passport.authenticate('bearer', {
         deal.transactions.push(transaction._id);
         deal.quantity -= req.body.quantity;
         deal.save();
-        gcm.sendMerchantNotification(deal._id);
+        gcm.sendMerchantNotification(deal._id, 1);
         return res.status(200).json(transaction);
       });
     });

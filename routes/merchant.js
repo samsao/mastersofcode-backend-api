@@ -238,6 +238,7 @@ transactionRouter.post('/complete', passport.authenticate('bearer', {
       }
       transaction.save();
       console.log("Payment Status: " + data.paymentStatus);
+      gcm.sendMerchantNOtification(transaction.deal, 2);
       return res.status(200).json(transaction);
     });
   });
