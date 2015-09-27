@@ -6,7 +6,7 @@ var Client = require('../model/client');
 var senderMerchant = new gcm.Sender('AIzaSyAqlOm3cNRP6f8cjJI6pku1ZfLuZQSxK6k');
 var senderClient = new gcm.Sender('AIzaSyCXD3FD4tAckwET_xmrR7ABC4X4S5aXUMA');
 
-gcm.sendClientNotification = function () {
+gcm.sendClientNotification = function (title) {
 	Client.find({}, {
 		gcmId: 1,
 		_id: 0
@@ -21,7 +21,7 @@ gcm.sendClientNotification = function () {
 		});
 		var message = new gcm.Message({
 			notification: {
-				title: "There's a new deal!",
+				title: title,
 				icon: "ic_launcher",
 				sound: "default"
 			}
@@ -30,8 +30,8 @@ gcm.sendClientNotification = function () {
 			registrationIds: notificationIdList
 		}, function (error, result) {
 			console.log('???????????????????@@/');
-			if (error){
-				console.error('GCM error!!!!!',error);
+			if (error) {
+				console.error('GCM error!!!!!', error);
 			}
 			else
 				console.log(result);

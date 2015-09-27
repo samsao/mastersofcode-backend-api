@@ -117,7 +117,7 @@ dealRouter.post('/add', upload.single('imageFile'), passport.authenticate('beare
       console.error(error);
       return res.status(500).error(error);
     }
-    gcm.sendClientNotification();
+    gcm.sendClientNotification("There's a new deal!");
     return res.status(200).json(deal);
   });
 });
@@ -239,6 +239,7 @@ transactionRouter.post('/complete', passport.authenticate('bearer', {
       transaction.save();
       console.log("Payment Status: " + data.paymentStatus);
       gcm.sendMerchantNOtification(transaction.deal, 2);
+      gcm.sendClientNotification("Transaction has been completed, thank you!");
       return res.status(200).json(transaction);
     });
   });
