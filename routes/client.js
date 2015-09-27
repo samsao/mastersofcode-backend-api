@@ -34,7 +34,8 @@ connect.post('/reg', function (req, res) {
     phone: req.body.phone,
   }, {
       phone: req.body.phone,
-      gcmId: req.body.gcmId
+      gcmId: req.body.gcmId,
+      token: Client.genACTK()
     }, {
       upsert: true,
       new: true
@@ -43,14 +44,7 @@ connect.post('/reg', function (req, res) {
         console.error(error);
         return res.status(500).json(error);
       }
-      client.token = client.genACTK();
-      client.save(function (error) {
-        if (error) {
-          console.error(error);
-          return res.status(500).json(error);
-        }
-        return res.status(200).json(client);
-      });
+      return res.status(200).json(client);
     });
 });
 

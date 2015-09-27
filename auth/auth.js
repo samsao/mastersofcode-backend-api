@@ -6,6 +6,7 @@ var Client = require('../model/client');
 passport.use(new BearerStrategy({
 	"passReqToCallback": true
 }, function (req, accessToken, done) {
+	console.log(req.baseUrl);
 	Client.findOne({
 		token: accessToken
 	}, function (error, client) {
@@ -21,5 +22,5 @@ passport.use(new BearerStrategy({
 			scope: '*'
 		};
 		return done(null, client, info);
-	})
+	});
 }));

@@ -1,46 +1,50 @@
 var express = require('express');
+var passport = require('passport');
+var connectRouter = express.Router();
 var router = express.Router();
-var connect = express.Router();
-var Merchant = require('../model/merchant');
+var dealRouter = express.Router();
 
-connect.get('/test', function (req, res) {
+
+var Merchant = require('../model/merchant');
+var Deal = require('../model/deal');
+
+connectRouter.get('/test', function (req, res) {
   res.status(200).json({
     message: 'hahahaha'
   });
 });
 
-connect.post('/reg', function (req, res) {
+connectRouter.post('/reg', function (req, res) {
   Merchant.findOneAndUpdate({
-    phone: req.query.phone
-  },{
+    phone: req.body.phone
+  }, {
       phone: req.body.phone,
-      address: req.body.address
+      address: req.body.address,
+      token: Merchant.genACTK()
     }, {
       upsert: true,
       new: true
     }, function (error, Merchant) {
       if (error) {
+        console.error(error);
         return res.status(500).json({
           message: 'internal error'
         });
       }
-      Merchant.token = Merchant.genACTK();
-      Merchant.save(function (error) {
-        if (error) {
-          console.error(error);
-          return res.status(500).json(error);
-        }
-        return res.status(200).json(Merchant);
-      });
-
+      return res.status(200).json(Merchant);
     });
 });
 
+dealRouter.get('/', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  Deal.find()
+})
 
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
 });
 
-router.use('/connect', connect);
+router.use('/connect', connectRouter);
 
 module.exports = router;

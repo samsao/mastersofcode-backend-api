@@ -29,7 +29,7 @@ var Client = new Schema({
 	}
 });
 
-Client.methods.genACTK = function () {
+Client.statics.genACTK = function genACTK() {
 	var hmac = crypto.createHmac('sha1', key);
 	hmac.update('' + Date.now() + crypto.randomBytes(128));
 	return hmac.digest('base64').replace(/\+/g, '').replace(/\//g, '').replace(/=/g, '');
