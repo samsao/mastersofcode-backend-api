@@ -67,6 +67,47 @@ dealRouter.post('/add', passport.authenticate('bearer', {
     }
     return res.status(200).json(deal);
   });
+  });
+
+dealRouter.put('/:dealId', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  Deal.findById(req.params.dealId, function (error, deal) {
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+    if (!deal) {
+      return res.status(404).json({
+        message: 'deal not found'
+      });
+    }
+    if (req.body.title) {
+      deal.title = req.body.title;
+    }
+    if (req.body.description) {
+      deal.description = req.body.description;
+    }
+    if (req.body.originalPrice) {
+      deal.originalPrice = req.body.originalPrice;
+    }
+    if (req.body.price) {
+      deal.price = req.body.price;
+    }
+    if (req.body.image) {
+      deal.image = req.body.image;
+    }
+    if (req.body.quantity) {
+      deal.quantity = req.body.quantity;
+    }
+    deal.save(function (error) {
+      if (error) {
+        console.error(error);
+        return res.status(500).json(error);
+      }
+      return res.status(200).json(deal);  
+    })
+  });
 });
 
 router.get('/', function (req, res, next) {
