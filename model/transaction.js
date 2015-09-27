@@ -22,10 +22,19 @@ var Transaction = new Schema({
 		type: String,
 		required: true,
 		unique: true
+	},
+	paymentAuthorizationId: {
+		type: String,
+		required: true,
+		unique: true
+	},
+	paymentStatus: {
+		type: String,
+		enum: 'APPROVED DECLINED'.split(' ')
 	}
 });
 
-Transaction.methods.generateKey = function(data){
+Transaction.statics.genKey = function(data){
 	var hmac = crypto.createHmac('sha1', key);
 	hmac.update(data);
 	return hmac.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '.');
