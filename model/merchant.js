@@ -13,15 +13,13 @@ var Merchant = new Schema({
 		required: true,
 		unique: true
 	},
-	// name: {
-	// 	type: String
-	// },
-	// loc: {
-	// 	lng: Number,
-	// 	lat: Number
-	// },
-	address: {
-		type: String
+	place: {
+		name: {
+			type: String
+		},
+		id: {
+			type: String
+		}
 	},
 	token: {
 		type: String,

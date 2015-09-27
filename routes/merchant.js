@@ -21,20 +21,50 @@ connectRouter.post('/reg', function (req, res) {
     phone: req.body.phone
   }, {
       phone: req.body.phone,
-      address: req.body.address,
       token: Merchant.genACTK()
     }, {
       upsert: true,
       new: true
-    }, function (error, Merchant) {
+    }, function (error, merchant) {
       if (error) {
         console.error(error);
         return res.status(500).json({
           message: 'internal error'
         });
       }
-      return res.status(200).json(Merchant);
+      return res.status(200).json(merchant);
     });
+});
+
+connectRouter.put('/', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  Merchant.findById(req.user._id, function (error, merchant) {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'internal error'
+      });
+    }
+    if (req.body.phone) {
+      merchant.phone = req.body.phone
+    }
+    if (req.body.placeId) {
+      merchant.place.id = req.body.placeId
+    }
+    if (req.body.placeName) {
+      merchant.place.name = req.body.placeName
+    }
+    merchant.save(function (error) {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({
+          message: 'internal error'
+        });
+      }
+      return res.status(200).json(merchant);
+    });
+  });
 });
 
 dealRouter.get('/', passport.authenticate('bearer', {
