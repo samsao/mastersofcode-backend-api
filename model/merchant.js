@@ -24,6 +24,9 @@ var Merchant = new Schema({
 	token: {
 		type: String,
 		unique: true
+	},
+	gcmId: {
+		type: String
 	}
 });
 

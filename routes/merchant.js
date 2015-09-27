@@ -1,10 +1,26 @@
 var express = require('express');
 var passport = require('passport');
+var multer = require('multer');
+var async = require('async');
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, process.cwd() + '/uploads/');
+  },
+  filename: function (req, file, cb) {
+    var ext = file.originalname.split('.').pop();
+    cb(null, file.fieldname + '-' + Date.now() + '.' + ext);
+  }
+});
+var upload = multer({ storage: storage });
 var Simplify = require('simplify-commerce');
+
 var simplifyClient = Simplify.getClient({
   publicKey: 'sbpb_ZmE4OGEwNzAtZGQ0Yi00OGQyLWIwY2QtNzM0YTE0YzNjNGNi',
   privateKey: 'RF3y6TCNi2bgWDJNbA2nCLZX2ejIa0hpJR4wHk+qoIJ5YFFQL0ODSXAOkNtXTToq'
 });
+
+var gcm = require('../class/gcm');
 
 var router = express.Router();
 var connectRouter = express.Router();
@@ -21,6 +37,7 @@ connectRouter.post('/reg', function (req, res) {
     phone: req.body.phone
   }, {
       phone: req.body.phone,
+      gcmId: req.body.gcmId,
       token: Merchant.genACTK()
     }, {
       upsert: true,
@@ -46,14 +63,17 @@ connectRouter.put('/', passport.authenticate('bearer', {
         message: 'internal error'
       });
     }
+    if (req.body.gcmId) {
+      merchant.gcmId = req.body.gcmId;
+    }
     if (req.body.phone) {
-      merchant.phone = req.body.phone
+      merchant.phone = req.body.phone;
     }
     if (req.body.placeId) {
-      merchant.place.id = req.body.placeId
+      merchant.place.id = req.body.placeId;
     }
     if (req.body.placeName) {
-      merchant.place.name = req.body.placeName
+      merchant.place.name = req.body.placeName;
     }
     merchant.save(function (error) {
       if (error) {
@@ -81,7 +101,7 @@ dealRouter.get('/', passport.authenticate('bearer', {
   });
 });
 
-dealRouter.post('/add', passport.authenticate('bearer', {
+dealRouter.post('/add', upload.single('imageFile'), passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
   Deal.create({
@@ -90,13 +110,14 @@ dealRouter.post('/add', passport.authenticate('bearer', {
     description: req.body.description,
     originalPrice: req.body.originalPrice,
     price: req.body.price,
-    image: req.body.image,
+    image: req.file.filename,
     quantity: req.body.quantity
   }, function (error, deal) {
     if (error) {
       console.error(error);
       return res.status(500).error(error);
     }
+    gcm.sendClientNotification();
     return res.status(200).json(deal);
   });
 });
@@ -205,6 +226,40 @@ transactionRouter.post('/complete', passport.authenticate('bearer', {
 
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
+});
+
+// var sendMoney = function sendMoney() {
+//   var cardMappingServiceClass = require('./mastercard-api-node/services/moneysend/CardMappingService');
+//   var environment = require('./mastercard-api-node/common/Environment');
+// };
+
+router.post('/withdraw', passport.authenticate('bearer', {
+  session: false
+}), function (req, res) {
+  Transaction.find({
+    merchant: req.user._id
+  }, function (error, transactions) {
+    var total = 0;
+    async.each(transactions, function (transaction, callback) {
+      transactions.status = 2;
+      transaction.save(function (error) {
+        if (error) {
+          callback(error);
+        }
+        total += transaction.amount;
+        callback();
+      });
+    }, function (error) {
+      if (error) {
+        console.error(error);
+        return res.status(500).json(error);
+      }
+      sendMoney(total);
+      return res.status(200).json({
+        moneySent: total
+      });
+    });
+  });
 });
 
 router.use('/connect', connectRouter);

@@ -19,8 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-app.use('/', routes);
+app.use('/', express.static(__dirname + '/uploads'));
 app.use('/client', client);
 app.use('/merchant', merchant);
 

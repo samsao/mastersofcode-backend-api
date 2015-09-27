@@ -16,6 +16,8 @@ var Client = require('../model/client');
 var Deal = require('../model/deal');
 var Transaction = require('../model/transaction');
 
+var gcm = require('../class/gcm');
+
 connectRouter.get('/login', function (req, res) {
   Client.findOne({
     phone: req.query.phone
@@ -57,7 +59,7 @@ connectRouter.post('/reg', function (req, res) {
 dealRouter.get('/', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
-  Deal.find({}, function (error, deals) {
+  Deal.find({}).populate('merchant').sort({_id: -1}).exec(function (error, deals) {
     if (error) {
       console.error(error);
       return res.status(500).json(error);
@@ -101,6 +103,7 @@ transactionRouter.post('/add', passport.authenticate('bearer', {
       return res.status(500).json(error);
     }
     if (!deal) {
+      console.log('deal', req.body.deal);
       return res.status(404).json({
         message: 'deal not found'
       });
@@ -140,6 +143,7 @@ transactionRouter.post('/add', passport.authenticate('bearer', {
         deal.transactions.push(transaction._id);
         deal.quantity -= req.body.quantity;
         deal.save();
+        gcm.sendMerchantNotification(deal._id);
         return res.status(200).json(transaction);
       });
     });
