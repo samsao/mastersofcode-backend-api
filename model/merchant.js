@@ -2,18 +2,18 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Merchant = new Schema({
-	digitId: {
+	phone: {
 		type: String,
 		required: true,
 		unique: true
 	},
-	name: {
-		type: String
-	},
-	loc: {
-		lng: Number,
-		lat: Number
-	},
+	// name: {
+	// 	type: String
+	// },
+	// loc: {
+	// 	lng: Number,
+	// 	lat: Number
+	// },
 	address: {
 		type: String
 	}

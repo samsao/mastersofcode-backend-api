@@ -1,3 +1,4 @@
+'use strict';
 var express = require('express');
 var router = express.Router();
 var connect = express.Router();
@@ -29,23 +30,28 @@ connect.get('/login', function (req, res) {
 });
 
 connect.post('/reg', function (req, res) {
-  Client.create({
+  Client.findOneAndUpdate({
     phone: req.body.phone,
-    gcmId: req.body.gcmId
-  }, function(error, client){
-    if (error){
-      console.error(error);
-      return res.status(500).json(error);
-    }
-    client.token = client.genACTK();
-    client.save(function(error){
-      if(error){
+  }, {
+      phone: req.body.phone,
+      gcmId: req.body.gcmId
+    }, {
+      upsert: true,
+      new: true
+    }, function (error, client) {
+      if (error) {
         console.error(error);
         return res.status(500).json(error);
       }
-      return res.status(200).json(client);
-    })
-  });
+      client.token = client.genACTK();
+      client.save(function (error) {
+        if (error) {
+          console.error(error);
+          return res.status(500).json(error);
+        }
+        return res.status(200).json(client);
+      });
+    });
 });
 
 
