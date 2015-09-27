@@ -59,7 +59,11 @@ connectRouter.post('/reg', function (req, res) {
 dealRouter.get('/', passport.authenticate('bearer', {
   session: false
 }), function (req, res, next) {
-  Deal.find({}).populate('merchant').sort({_id: -1}).exec(function (error, deals) {
+  Deal.find({
+    quantity: {
+      $gt: 0
+    }
+  }).populate('merchant').sort({_id: -1}).exec(function (error, deals) {
     if (error) {
       console.error(error);
       return res.status(500).json(error);
