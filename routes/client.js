@@ -1,6 +1,5 @@
 'use strict';
 var express = require('express');
-var router = express.Router();
 var passport = require('passport');
 var Simplify = require('simplify-commerce');
 var simplifyClient = Simplify.getClient({
@@ -8,6 +7,7 @@ var simplifyClient = Simplify.getClient({
   privateKey: 'RF3y6TCNi2bgWDJNbA2nCLZX2ejIa0hpJR4wHk+qoIJ5YFFQL0ODSXAOkNtXTToq'
 });
 
+var router = express.Router();
 var connectRouter = express.Router();
 var dealRouter = express.Router();
 var transactionRouter = express.Router();
@@ -15,12 +15,6 @@ var transactionRouter = express.Router();
 var Client = require('../model/client');
 var Deal = require('../model/deal');
 var Transaction = require('../model/transaction');
-
-connectRouter.get('/test', function (req, res) {
-  res.status(200).json({
-    message: 'hahahaha'
-  });
-});
 
 connectRouter.get('/login', function (req, res) {
   Client.findOne({
@@ -111,6 +105,11 @@ transactionRouter.post('/add', passport.authenticate('bearer', {
         message: 'deal not found'
       });
     }
+    if (req.body.quantity > deal.quantity) {
+      return res.status(403).json({
+        message: 'you bought too much'
+      });
+    }
     simplifyClient.authorization.create({
       amount: deal.price * req.body.quantity * 100,
       token: req.body.token,
@@ -135,6 +134,9 @@ transactionRouter.post('/add', passport.authenticate('bearer', {
           console.error(error);
           return res.status(500).json(error);
         }
+        deal.transactions.push(transaction._id);
+        deal.quantity -= req.body.quantity;
+        deal.save();
         return res.status(200).json(transaction);
       });
     });

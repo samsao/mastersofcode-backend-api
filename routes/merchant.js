@@ -1,18 +1,20 @@
 var express = require('express');
 var passport = require('passport');
-var connectRouter = express.Router();
+var Simplify = require('simplify-commerce');
+var simplifyClient = Simplify.getClient({
+  publicKey: 'sbpb_ZmE4OGEwNzAtZGQ0Yi00OGQyLWIwY2QtNzM0YTE0YzNjNGNi',
+  privateKey: 'RF3y6TCNi2bgWDJNbA2nCLZX2ejIa0hpJR4wHk+qoIJ5YFFQL0ODSXAOkNtXTToq'
+});
+
 var router = express.Router();
+var connectRouter = express.Router();
 var dealRouter = express.Router();
+var transactionRouter = express.Router();
 
 
 var Merchant = require('../model/merchant');
 var Deal = require('../model/deal');
-
-connectRouter.get('/test', function (req, res) {
-  res.status(200).json({
-    message: 'hahahaha'
-  });
-});
+var Transaction = require('../model/transaction');
 
 connectRouter.post('/reg', function (req, res) {
   Merchant.findOneAndUpdate({
@@ -67,7 +69,20 @@ dealRouter.post('/add', passport.authenticate('bearer', {
     }
     return res.status(200).json(deal);
   });
+});
+
+dealRouter.get('/:dealId', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  /// TODO check this deal is belong to this merchant
+  Deal.findById(req.params.dealId).populate('transactions').exec(function (error, transactions) {
+    if (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+    return res.status(200).json(transactions);
   });
+});
 
 dealRouter.put('/:dealId', passport.authenticate('bearer', {
   session: false
@@ -105,9 +120,15 @@ dealRouter.put('/:dealId', passport.authenticate('bearer', {
         console.error(error);
         return res.status(500).json(error);
       }
-      return res.status(200).json(deal);  
+      return res.status(200).json(deal);
     })
   });
+});
+
+transactionRouter.post('/complete', passport.authenticate('bearer', {
+  session: false
+}), function (req, res, next) {
+  
 });
 
 router.get('/', function (req, res, next) {
@@ -116,5 +137,6 @@ router.get('/', function (req, res, next) {
 
 router.use('/connect', connectRouter);
 router.use('/deal', dealRouter);
+router.use('/transaction', transactionRouter);
 
 module.exports = router;
