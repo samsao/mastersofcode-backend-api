@@ -46,5 +46,6 @@ router.get('/', function (req, res, next) {
 });
 
 router.use('/connect', connectRouter);
+router.use('/deal', dealRouter);
 
 module.exports = router;
